@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مجتمع مسکونی ۱۶۰ واحدی پردیس - سامانه آب و شارژ</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+        
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --danger: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.8rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0; z-index: 100;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .logo-icon {
+            background: var(--accent); color: white;
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.1rem;
+        }
+        .logo-text h2 { font-size: 0.9rem; font-weight: 700; }
+        .logo-text small { font-size: 0.7rem; color: var(--text-muted); }
+
+        nav { display: flex; gap: 4px; align-items: center; }
+        nav button {
+            background: none; border: none; color: var(--text-muted);
+            font-size: 0.8rem; font-weight: 500; padding: 6px 8px;
+            border-radius: 8px; cursor: pointer;
+        }
+        nav button.active { color: var(--accent); background: #eff6ff; }
+
+        .admin-btn {
+            background: var(--primary); color: white; padding: 6px 10px;
+            border-radius: 8px; font-size: 0.8rem; cursor: pointer; border: none; font-weight: 500;
+        }
+        .admin-btn.logged-in {
+            background: var(--success);
+        }
+
+        main { max-width: 1000px; margin: 0 auto; padding: 15px 10px; flex: 1; width: 100%; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+
+        .hero {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white; border-radius: 14px; padding: 20px;
+            margin-bottom: 20px;
+        }
+        .hero h1 { font-size: 1.2rem; margin-bottom: 6px; line-height: 1.4; }
+        .hero p { font-size: 0.8rem; color: #cbd5e1; }
+
+        .blocks-grid {
+            display: grid; grid-template-columns: 1fr;
+            gap: 12px; margin-bottom: 25px;
+        }
+        @media (min-width: 640px) {
+            .blocks-grid { grid-template-columns: repeat(3, 1fr); }
+            .logo-text h2 { font-size: 1rem; }
+            .hero { padding: 30px; }
+            .hero h1 { font-size: 1.5rem; }
+        }
+
+        .block-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 15px; display: flex;
+            justify-content: space-between; align-items: center; cursor: pointer;
+        }
+        .block-badge {
+            background: #eff6ff; color: var(--accent); width: 40px; height: 40px;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: bold;
+        }
+
+        .controls-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-direction: column; }
+        @media (min-width: 580px) {
+            .controls-bar { flex-direction: row; }
+        }
+        .search-input, .select-filter {
+            padding: 9px 12px; border: 1px solid var(--border);
+            border-radius: 10px; font-size: 0.85rem; outline: none; width: 100%; background: white;
+        }
+
+        .units-table-wrapper {
+            background: white; border-radius: 12px; border: 1px solid var(--border);
+            width: 100%; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th, td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        th { background: #f8fafc; color: var(--text-muted); font-weight: 600; }
+
+        .status-badge {
+            padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; display: inline-block;
+        }
+        .status-paid { background: #dcfce7; color: var(--success); }
+        .status-unpaid { background: #fee2e2; color: var(--danger); }
+
+        .action-btn {
+            background: var(--accent); color: white; border: none;
+            padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 15px;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white; border-radius: 16px; padding: 20px;
+            max-width: 400px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        .close-btn {
+            position: absolute; top: 15px; left: 15px;
+            border: none; background: none; font-size: 1.3rem; cursor: pointer; color: var(--text-muted);
+        }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; font-size: 0.8rem; color: var(--text-muted); }
+        .form-group input {
+            width: 100%; padding: 9px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem;
+        }
+        .submit-btn {
+            width: 100%; background: var(--accent); color: white; border: none;
+            padding: 11px; border-radius: 10px; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin-top: 8px;
+        }
+
+        .info-box {
+            background: #f1f5f9; border-radius: 8px; padding: 10px;
+            font-size: 0.8rem; color: var(--text-main); margin-top: 10px; line-height: 1.5;
+        }
+
+        footer { background: var(--primary); color: #94a3b8; padding: 20px 10px; text-align: center; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area" onclick="showSection('home')">
+            <div class="logo-icon">P</div>
+            <div class="logo-text">
+                <h2>مجتمع پردیس</h2>
+                <small>آب و شارژ</small>
+            </div>
+        </div>
+        <nav>
+            <button onclick="showSection('home')" id="nav-home" class="active">خانه</button>
+            <button onclick="showSection('units')" id="nav-units">واحدها</button>
+        </nav>
+        <button class="admin-btn" id="adminNavBtn" onclick="openAdminModal()">مدیریت</button>
+    </header>
+
+    <main>
+        <section id="home" class="page-section active">
+            <div class="hero">
+                <p style="color: #94a3b8; margin-bottom: 4px; font-size: 0.75rem;">سامانه شفاف‌سازی مالی</p>
+                <h1>مجتمع مسکونی ۱۶۰ واحدی پردیس</h1>
+                <p>برای بررسی وضعیت حساب واحد خود، روی بلوک مربوطه کلیک کنید.</p>
+            </div>
+
+            <h3 style="margin-bottom: 10px; font-size: 1rem;">انتخاب بلوک</h3>
+            <div class="blocks-grid">
+                <div class="block-card" onclick="filterByBlock('A')">
+                    <div>
+                        <h3 style="font-size: 1rem;">بلوک A</h3>
+                        <p style="color: var(--text-muted); font-size: 0.75rem;">۵۶ واحد (۸ طبقه)</p>
+                    </div>
+                    <div class="block-badge">A</div>
+                </div>
+                <div class="block-card" onclick="filterByBlock('B')">
+                    <div>
+                        <h3 style="font-size: 1rem;">بلوک B</h3>
+                        <p style="color: var(--text-muted); font-size: 0.75rem;">۵۶ واحد (۸ طبقه)</p>
+                    </div>
+                    <div class="block-badge">B</div>
+                </div>
+                <div class="block-card" onclick="filterByBlock('C')">
+                    <div>
+                        <h3 style="font-size: 1rem;">بلوک C</h3>
+                        <p style="color: var(--text-muted); font-size: 0.75rem;">۴۸ واحد</p>
+                    </div>
+                    <div class="block-badge">C</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="units" class="page-section">
+            <h2 style="margin-bottom: 12px; font-size: 1.1rem;">لیست واحدها و وضعیت حساب</h2>
+            <div class="controls-bar">
+                <input type="text" id="searchInput" class="search-input" placeholder="جستجو (مثلاً A32)..." oninput="renderTable()">
+                <select id="blockFilter" class="select-filter" onchange="renderTable()">
+                    <option value="ALL">همه بلوک‌ها</option>
+                    <option value="A">بلوک A</option>
+                    <option value="B">بلوک B</option>
+                    <option value="C">بلوک C</option>
+                </select>
+                <select id="statusFilter" class="select-filter" onchange="renderTable()">
+                    <option value="ALL">همه وضعیت‌ها</option>
+                    <option value="PAID">تسویه‌شده</option>
+                    <option value="UNPAID">بدهکار</option>
+                </select>
+            </div>
+
+            <div class="units-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>واحد</th>
+                            <th>مجموع بدهی</th>
+                            <th>وضعیت</th>
+                            <th style="text-align: center;">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="unitsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- مدال صورتحساب / جزئیات -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('detailsModal')">&times;</button>
+            <h3 style="margin-bottom: 10px; font-size: 1rem;" id="detailsTitle">صورتحساب واحد</h3>
+            <div id="unitDetailsContent" style="line-height: 1.7; font-size: 0.85rem;"></div>
+            <div class="info-box">
+                <b>نحوه پرداخت:</b> لطفاً مبلغ را به حساب مدیریت واریز کرده و رسید آن را ارسال فرمایید.
+            </div>
+            <button class="submit-btn" onclick="closeModal('detailsModal')">بستن</button>
+        </div>
+    </div>
+
+    <!-- مدال ورود مدیر -->
+    <div class="modal" id="adminLoginModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('adminLoginModal')">&times;</button>
+            <h3 style="margin-bottom: 10px; font-size: 1rem;">ورود مدیریت مجتمع</h3>
+            <div class="form-group">
+                <label>رمز عبور (پیش‌فرض: 1234):</label>
+                <input type="password" id="adminPassInput" placeholder="****">
+            </div>
+            <button class="submit-btn" onclick="loginAdmin()">ورود به پنل</button>
+        </div>
+    </div>
+
+    <!-- مدال ویرایش مدیر -->
+    <div class="modal" id="adminEditModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('adminEditModal')">&times;</button>
+            <h3 style="margin-bottom: 10px; font-size: 1rem;" id="adminEditTitle">ویرایش بدهی واحد</h3>
+            <input type="hidden" id="editUnitId">
+            <div class="form-group">
+                <label>بدهی شارژ (تومان):</label>
+                <input type="number" id="editChargeInput">
+            </div>
+            <div class="form-group">
+                <label>بدهی آب (تومان):</label>
+                <input type="number" id="editWaterInput">
+            </div>
+            <button class="submit-btn" onclick="saveUnitData()">ذخیره تغییرات</button>
+        </div>
+    </div>
+
+    <footer>
+        مجتمع مسکونی ۱۶۰ واحدی پردیس
+    </footer>
+
+    <script>
+        const STORAGE_KEY = 'pardis_160_units_v2';
+        let unitsData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+        // ایجاد اولیه ۱۶۰ واحد (همه تسویه‌شده و بدون بدهی)
+        if (unitsData.length === 0) {
+            ['A', 'B'].forEach(block => {
+                for (let floor = 1; floor <= 8; floor++) {
+                    for (let u = 1; u <= 7; u++) {
+                        const unitCode = `${block}${floor}${u}`;
+                        unitsData.push({
+                            id: unitCode,
+                            block: block,
+                            unitCode: unitCode,
+                            floor: floor,
+                            unitNum: u,
+                            chargeDebt: 0,
+                            waterDebt: 0,
+                            status: 'PAID'
+                        });
+                    }
+                }
+            });
+
+            for (let floor = 1; floor <= 8; floor++) {
+                for (let u = 1; u <= 6; u++) {
+                    const unitCode = `C${floor}${u}`;
+                    unitsData.push({
+                        id: unitCode,
+                        block: 'C',
+                        unitCode: unitCode,
+                        floor: floor,
+                        unitNum: u,
+                        chargeDebt: 0,
+                        waterDebt: 0,
+                        status: 'PAID'
+                    });
+                }
+            }
+            saveToStorage();
+        }
+
+        let isAdminLoggedIn = false;
+
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(unitsData));
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            const navBtn = document.getElementById(`nav-${sectionId}`);
+            if(navBtn) navBtn.classList.add('active');
+
+            if (sectionId === 'units') renderTable();
+        }
+
+        function filterByBlock(blockName) {
+            showSection('units');
+            document.getElementById('blockFilter').value = blockName;
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('unitsTableBody');
+            const search = document.getElementById('searchInput').value.trim().toUpperCase();
+            const blockFilter = document.getElementById('blockFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            tbody.innerHTML = '';
+
+            const filtered = unitsData.filter(item => {
+                const matchBlock = (blockFilter === 'ALL' || item.block === blockFilter);
+                const matchStatus = (statusFilter === 'ALL' || item.status === statusFilter);
+                const matchSearch = (search === '' || item.unitCode.includes(search));
+                return matchBlock && matchStatus && matchSearch;
+            });
+
+            filtered.forEach(item => {
+                const totalDebt = item.chargeDebt + item.waterDebt;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>واحد ${item.unitCode}</b> <small style="color:var(--text-muted); display:block;">طبقه ${item.floor}</small></td>
+                    <td style="color: ${totalDebt > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight: bold;">
+                        ${totalDebt.toLocaleString('fa-IR')} تومان
+                    </td>
+                    <td>
+                        <span class="status-badge ${item.status === 'PAID' ? 'status-paid' : 'status-unpaid'}">
+                            ${item.status === 'PAID' ? 'تسویه‌شده' : 'بدهکار'}
+                        </span>
+                    </td>
+                    <td style="text-align: center;">
+                        ${isAdminLoggedIn ? 
+                            `<button class="action-btn" style="background:var(--primary);" onclick="openEditModal('${item.id}')">ویرایش</button>` :
+                            `<button class="action-btn" onclick="openDetailsModal('${item.id}')">مشاهده</button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openDetailsModal(id) {
+            const unit = unitsData.find(u => u.id === id);
+            const totalDebt = unit.chargeDebt + unit.waterDebt;
+            
+            document.getElementById('detailsTitle').innerText = `صورتحساب واحد ${unit.unitCode}`;
+            document.getElementById('unitDetailsContent').innerHTML = `
+                <p><b>شناسه واحد:</b> ${unit.unitCode} (بلوک ${unit.block} - طبقه ${unit.floor})</p>
+                <hr style="margin:8px 0; border:none; border-top:1px solid #e2e8f0;">
+                <p><b>بدهی شارژ:</b> ${unit.chargeDebt.toLocaleString('fa-IR')} تومان</p>
+                <p><b>بدهی آب:</b> ${unit.waterDebt.toLocaleString('fa-IR')} تومان</p>
+                <p style="font-size:0.95rem; color:${totalDebt > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:bold; margin-top:5px;">
+                    <b>جمع کل بدهی:</b> ${totalDebt.toLocaleString('fa-IR')} تومان
+                </p>
+            `;
+            document.getElementById('detailsModal').classList.add('active');
+        }
+
+        function openAdminModal() {
+            if(isAdminLoggedIn) {
+                if(confirm('آیا می‌خواهید از حساب مدیریت خارج شوید؟')) {
+                    isAdminLoggedIn = false;
+                    const btn = document.getElementById('adminNavBtn');
+                    btn.innerText = 'مدیریت';
+                    btn.classList.remove('logged-in');
+                    renderTable();
+                    alert('از حساب مدیریت خارج شدید.');
+                }
+            } else {
+                document.getElementById('adminLoginModal').classList.add('active');
+            }
+        }
+
+        function loginAdmin() {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === '1234') {
+                isAdminLoggedIn = true;
+                const btn = document.getElementById('adminNavBtn');
+                btn.innerText = 'مدیر (فعال)';
+                btn.classList.add('logged-in');
+                closeModal('adminLoginModal');
+                alert('ورود مدیریت با موفقیت انجام شد. اکنون دکمه ویرایش برای واحدها فعال است.');
+                showSection('units');
+            } else {
+                alert('رمز عبور اشتباه است!');
+            }
+        }
+
+        function openEditModal(id) {
+            const unit = unitsData.find(u => u.id === id);
+            document.getElementById('editUnitId').value = unit.id;
+            document.getElementById('adminEditTitle').innerText = `ویرایش واحد ${unit.unitCode}`;
+            document.getElementById('editChargeInput').value = unit.chargeDebt;
+            document.getElementById('editWaterInput').value = unit.waterDebt;
+            document.getElementById('adminEditModal').classList.add('active');
+        }
+
+        function saveUnitData() {
+            const id = document.getElementById('editUnitId').value;
+            const unit = unitsData.find(u => u.id === id);
+            
+            unit.chargeDebt = parseInt(document.getElementById('editChargeInput').value) || 0;
+            unit.waterDebt = parseInt(document.getElementById('editWaterInput').value) || 0;
+            
+            const total = unit.chargeDebt + unit.waterDebt;
+            unit.status = (total === 0) ? 'PAID' : 'UNPAID';
+
+            saveToStorage();
+            renderTable();
+            closeModal('adminEditModal');
+            alert('اطلاعات با موفقیت ذخیره شد.');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+    </script>
+</body>
+</html>
